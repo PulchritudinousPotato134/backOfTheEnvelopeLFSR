@@ -1,0 +1,165 @@
+#include<iostream>
+#include<time.h>
+#include<chrono>
+#include<string>
+
+using namespace std::chrono;
+class lfsr
+{
+public:
+        void outputStream(int* binaryInput, int size);
+        lfsr();
+        int* ToBinary(std::string key, int length);
+        int* registers(int* binaryInput, int size);
+        int* concatArrays(int* a, int& size1, int* b, int& size2);
+        void printStream();
+
+private:
+    int register1;
+    int register2;
+    int register3;
+    int register4;
+    int streamSize;
+    int currentOutputSize;
+    int* oStream;
+};
+
+
+int* lfsr::registers(int* binaryInput, int size)
+{
+    int* output = new int[size];
+    for (int j = size-1; j>=0; j--)
+    {
+        register1 = binaryInput[j];
+        auto millisec_since_epoch1 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register1 = (register1 + millisec_since_epoch1) % 2;
+        register2 = register1;
+        auto millisec_since_epoch2 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register2 = (register2 + millisec_since_epoch2) % 2;
+        register3 = register2;
+        auto millisec_since_epoch3 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register3 = (register3 + millisec_since_epoch3) % 2;
+        register4 = register3;
+        auto millisec_since_epoch4 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register4 = (register4 + millisec_since_epoch4) % 2;
+        output[j] = register4;
+    }
+
+    for (int i = currentOutputSize; i < currentOutputSize + size; i++)
+    {
+        oStream[i] = output[i - currentOutputSize];
+    }
+    currentOutputSize += size;
+    return output;
+}
+int* lfsr::concatArrays(int* a, int &size1, int* b, int &size2)
+{
+    int newSize = size1 + size2;
+    int* outPut = new int[newSize];
+    for (int j = 0; j < size1; j++)
+        outPut[j] = a[j];
+
+    for (int i = size1; i < newSize; i++)
+    {
+        outPut[i] = b[i - size1];
+    }
+    size1 = newSize;
+    return outPut;
+}
+void lfsr::outputStream(int* binaryInput, int size)
+{
+    int n = 0;
+    int x = streamSize / size;
+    if ((streamSize+n) % size != 0)
+    {
+        while ((streamSize + n) % size != 0)
+        {
+            n++;
+        }
+    }
+
+
+    int* output = new int; 
+    int out = 0;
+    for (int i = 0; i < x; i++)
+    {
+        output = registers(binaryInput, size);
+    }
+    int* extra = new int;
+
+    if(n != 0)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            extra[i] = binaryInput[i];
+        }
+        output = registers(extra, n);
+    }
+
+
+    delete output;
+}
+lfsr::lfsr()
+{
+    std::string inputKey;
+    std::cout << "Please enter the key:";
+    std::cin >> inputKey;
+    std::cout << "Please select the size of the output stream:";
+    std::cin >> streamSize;
+    oStream = new int;
+    int length = inputKey.length();
+    int* binVal = ToBinary(inputKey, length);
+    int* OSinput = new int[binVal[0]];
+    for (int i = 0; i < binVal[0]; i++)
+        OSinput[i] = binVal[i + 1];
+     outputStream(OSinput, binVal[0]);
+     printStream();
+
+}
+
+void lfsr::printStream()
+{
+    for (int i = 0; i < currentOutputSize; i++)
+        std::cout << oStream[i] << " ";
+}
+
+int* lfsr::ToBinary(std::string key, int length)
+{
+
+    int* arr = new int[length];
+    for (int i = 0; i < length; i++)
+        arr[i] = key[i];
+
+    int keyInt = 0;
+    for (int j = 0; j < length; j++)
+        keyInt += arr[j];
+
+    int a = 0;
+    int x = 0;
+    while (a < keyInt)
+        a = pow(2, x++);
+    int* binaryNum = new int[a];
+
+    int i = 0;
+    while (keyInt > 0) {
+        binaryNum[i] = keyInt % 2;
+        keyInt = keyInt / 2;
+        i++;
+    }
+
+    int* binaryResult = new int[i+1];
+    binaryResult[0] = i;
+    for (int m = i - 1, k = 1; m >= 0, k < i+1; m--, k++)
+    {
+        binaryResult[k] = binaryNum[m];
+
+    }
+
+    return binaryResult;
+}
+
+int main()
+{
+    lfsr* newlsfr = new lfsr();
+
+}
