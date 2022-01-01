@@ -1,0 +1,119 @@
+#include<iostream>
+#include<time.h>
+#include<chrono>
+#include<string>
+
+using namespace std::chrono;
+class lfsr
+{
+public:
+        void outputStream(int* binaryInput, int size);
+        lfsr();
+        int* ToBinary(std::string key, int length);
+        void printStream();
+
+private:
+    int register1;
+    int register2;
+    int register3;
+    int register4;
+    int register5;
+    int streamSize;
+    int* oStream;
+};
+
+void lfsr::outputStream(int* binaryInput, int size)
+{
+    streamSize = size;
+    for (int i = 0; i < size; i++)
+    {
+        std::cout << binaryInput[i] << " ";
+   }
+    int* output = new int[size];
+    int k = size-1;
+    for (int j = 0; j < size; j++)
+    {
+        register1 = binaryInput[j];
+        auto millisec_since_epoch1 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register1 = (register1 + millisec_since_epoch1) % 2;
+        register2 = register1;
+        auto millisec_since_epoch2 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register2 = (register2 + millisec_since_epoch2) % 2;
+        register3 = register2;
+        auto millisec_since_epoch3 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register3 = (register3 + millisec_since_epoch3) % 2;
+        register4 = register3;
+        auto millisec_since_epoch4 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register4 = (register4 + millisec_since_epoch4) % 2;
+        register5 = register4;
+        auto millisec_since_epoch5 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        register5 = (register5 + millisec_since_epoch5) % 2;
+
+        output[k] = register5;
+        k--;
+    }
+    for (int i = 0; i < size; i++)
+    {
+        std::cout << output[i] << " ";
+    }
+    oStream = output;
+}
+lfsr::lfsr()
+{
+    std::string input;
+    std::cout << "Please enter the key:";
+    std::cin >> input;
+    int length = input.length();
+    int* binVal = ToBinary(input, length);
+    int* OSinput = new int[binVal[0]];
+    for (int i = 0; i < binVal[0]; i++)
+        OSinput[i] = binVal[i + 1];
+     outputStream(OSinput, binVal[0]);
+     printStream();
+}
+
+void lfsr::printStream()
+{
+    for (int i = 0; i < streamSize; i++)
+        std::cout << oStream[i] << " ";
+}
+
+int* lfsr::ToBinary(std::string key, int length)
+{
+
+    int* arr = new int[length];
+    for (int i = 0; i < length; i++)
+        arr[i] = key[i];
+
+    int keyInt = 0;
+    for (int j = 0; j < length; j++)
+        keyInt += arr[j];
+
+    int a = 0;
+    int x = 0;
+    while (a < keyInt)
+        a = pow(2, x++);
+    int* binaryNum = new int[a];
+
+    int i = 0;
+    while (keyInt > 0) {
+        binaryNum[i] = keyInt % 2;
+        keyInt = keyInt / 2;
+        i++;
+    }
+
+    int* binaryResult = new int[i+1];
+    binaryResult[0] = i;
+    for (int m = i - 1, k = 1; m >= 0, k < i+1; m--, k++)
+    {
+        binaryResult[k] = binaryNum[m];
+
+    }
+
+    return binaryResult;
+}
+
+int main()
+{
+    lfsr* newlsfr = new lfsr();
+}
